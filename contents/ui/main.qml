@@ -9,7 +9,7 @@ import org.kde.plasma.plasma5support as Plasma5Support
 PlasmoidItem {
     id: root
 
-    // Core battery properties - removed unused 'isConnected' property
+    // Core battery properties
     property int batteryLevel: -1
     property bool isCharging: false
     property real currentAmps: 0.0
@@ -25,6 +25,8 @@ PlasmoidItem {
                                   Plasmoid.configuration.showPercentage : true
     property bool showPercentageLeft: Plasmoid.configuration.showPercentageLeft !== undefined ? 
                                       Plasmoid.configuration.showPercentageLeft : false
+    property bool rotateBatteryIcon: Plasmoid.configuration.rotateBatteryIcon !== undefined ? 
+                                     Plasmoid.configuration.rotateBatteryIcon : false
     property int updateInterval: Plasmoid.configuration.updateInterval !== undefined ? 
                                  Plasmoid.configuration.updateInterval : 2
 
@@ -42,7 +44,7 @@ PlasmoidItem {
         function exec(cmd) { executable.connectSource(cmd) }
     }
 
-    // Battery data update timer
+    // Battery data update timer - uses configuration interval
     Timer {
         id: updateTimer
         interval: updateInterval * 1000  // Convert seconds to milliseconds
@@ -389,7 +391,7 @@ PlasmoidItem {
 
     /**
      * Reusable battery header component with icon and status
-     * Used in both popup and full representation
+     * Used in both popup and full representation - includes rotation support
      */
     component BatteryHeader: RowLayout {
         Layout.alignment: Qt.AlignHCenter
@@ -399,6 +401,17 @@ PlasmoidItem {
             source: getBatteryIconName()
             width: Kirigami.Units.iconSizes.large
             height: Kirigami.Units.iconSizes.large
+            
+            // Apply rotation based on configuration
+            rotation: rotateBatteryIcon ? 180 : 0
+            
+            // Smooth rotation animation when configuration changes
+            Behavior on rotation {
+                RotationAnimation {
+                    duration: 300
+                    easing.type: Easing.InOutQuad
+                }
+            }
         }
 
         ColumnLayout {
@@ -430,7 +443,7 @@ PlasmoidItem {
             height: Kirigami.Units.gridUnit * 14
             spacing: Kirigami.Units.largeSpacing
 
-            // Reusable header component
+            // Reusable header component with rotation support
             BatteryHeader {}
 
             // Progress bar with visual feedback
@@ -480,7 +493,7 @@ PlasmoidItem {
         function showPopup() { visible = true }
     }
 
-    // COMPACT REPRESENTATION - Optimized with configurable position
+    // COMPACT REPRESENTATION - Optimized with configurable position and rotation
 
     compactRepresentation: Item {
         Layout.preferredWidth: batteryRow.implicitWidth
@@ -492,15 +505,26 @@ PlasmoidItem {
             id: batteryRow
             anchors.centerIn: parent
             spacing: Kirigami.Units.smallSpacing
-            // KEY FEATURE: Dynamic layout direction based on configuration
+            // Dynamic layout direction based on configuration
             layoutDirection: showPercentageLeft ? Qt.RightToLeft : Qt.LeftToRight
 
-            // Animated battery icon
+            // Animated battery icon with rotation support
             Kirigami.Icon {
                 source: getBatteryIconName()
                 width: Kirigami.Units.iconSizes.small
                 height: Kirigami.Units.iconSizes.small
                 color: getTextColor()
+                
+                // Apply rotation based on configuration
+                rotation: rotateBatteryIcon ? 180 : 0
+                
+                // Smooth rotation animation when configuration changes
+                Behavior on rotation {
+                    RotationAnimation {
+                        duration: 300
+                        easing.type: Easing.InOutQuad
+                    }
+                }
 
                 // Charging animation - pulsing effect
                 SequentialAnimation on opacity {
@@ -519,7 +543,7 @@ PlasmoidItem {
                 }
             }
 
-            // Battery percentage text - visibility controlled by configuration
+            // Battery percentage text - visibility and position controlled by configuration
             PlasmaComponents3.Label {
                 text: batteryLevel >= 0 ? batteryLevel + "%" : "?"
                 color: getTextColor()
@@ -547,14 +571,14 @@ PlasmoidItem {
 
     fullRepresentation: PlasmaComponents3.Page {
         Layout.preferredWidth: Kirigami.Units.gridUnit * 18
-        Layout.preferredHeight: Kirigami.Units.gridUnit * 14
+        Layout.preferredHeight: Kirigami.Units.gridUnit * 16
 
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: Kirigami.Units.largeSpacing
             spacing: Kirigami.Units.largeSpacing
 
-            // Reusable header component
+            // Reusable header component with rotation support
             BatteryHeader {}
 
             // Progress bar
@@ -601,6 +625,7 @@ PlasmoidItem {
                 Layout.alignment: Qt.AlignHCenter
                 text: "Position: " + (showPercentageLeft ? "Left" : "Right") + 
                       " • Show%: " + (showPercentage ? "Yes" : "No") + 
+                      " • Rotated: " + (rotateBatteryIcon ? "Yes" : "No") + 
                       " • Update: " + updateInterval + "s"
                 opacity: 0.6
                 font.pixelSize: Kirigami.Theme.smallFont.pixelSize

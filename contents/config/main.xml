@@ -20,6 +20,10 @@
             <min>1</min>
             <max>60</max>
         </entry>
+        <entry name="rotateBatteryIcon" type="Bool">
+            <label>Rotate battery icon by 180 degrees</label>
+            <default>false</default>
+        </entry>
     </group>
 </kcfg>
 

@@ -10,6 +10,7 @@ Kirigami.FormLayout {
     property alias cfg_showPercentage: showPercentage.checked
     property alias cfg_showPercentageLeft: showPercentageLeft.checked
     property alias cfg_updateInterval: updateInterval.value
+    property alias cfg_rotateBatteryIcon: rotateBatteryIcon.checked
 
     // GENERAL SETTINGS SECTION
     Item {
@@ -21,6 +22,11 @@ Kirigami.FormLayout {
         id: showPercentage
         Kirigami.FormData.label: i18n("Display:")
         text: i18n("Show battery percentage")
+    }
+    
+    QQC2.CheckBox {
+        id: rotateBatteryIcon
+        text: i18n("Rotate battery icon by 180°")
     }
     
     RowLayout {
@@ -58,7 +64,7 @@ Kirigami.FormLayout {
     QQC2.GroupBox {
         Layout.fillWidth: true
         title: i18n("Battery Percentage Position")
-        enabled: showPercentage.checked  // Only enabled when percentage is shown
+        enabled: showPercentage.checked
         
         ColumnLayout {
             anchors.fill: parent
@@ -94,7 +100,7 @@ Kirigami.FormLayout {
         Kirigami.FormData.label: i18n("Preview")
     }
 
-    // Live preview of the widget appearance
+    // Live preview of the widget appearance with rotation
     Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: Kirigami.Units.gridUnit * 2
@@ -112,6 +118,16 @@ Kirigami.FormLayout {
                 source: "battery-060"
                 width: Kirigami.Units.iconSizes.small
                 height: Kirigami.Units.iconSizes.small
+                // Apply rotation based on configuration
+                rotation: rotateBatteryIcon.checked ? 180 : 0
+                
+                // Smooth rotation animation when toggling
+                Behavior on rotation {
+                    RotationAnimation {
+                        duration: 300
+                        easing.type: Easing.InOutQuad
+                    }
+                }
             }
 
             QQC2.Label {
@@ -124,7 +140,7 @@ Kirigami.FormLayout {
 
     QQC2.Label {
         Layout.fillWidth: true
-        text: i18n("This preview shows how your battery widget will appear in the panel.")
+        text: i18n("This preview shows how your battery widget will appear in the panel. The 180° rotation can be useful for different visual orientations.")
         font.pointSize: Kirigami.Theme.smallFont.pointSize
         opacity: 0.6
         wrapMode: Text.WordWrap
