@@ -20,6 +20,14 @@ PlasmoidItem {
     property string timeRemaining: ""
     property string batteryPath: "/sys/class/power_supply/BAT0"
 
+    // Configuration properties from Plasmoid.configuration
+    property bool showPercentage: Plasmoid.configuration.showPercentage !== undefined ? 
+                                  Plasmoid.configuration.showPercentage : true
+    property bool showPercentageLeft: Plasmoid.configuration.showPercentageLeft !== undefined ? 
+                                      Plasmoid.configuration.showPercentageLeft : false
+    property int updateInterval: Plasmoid.configuration.updateInterval !== undefined ? 
+                                 Plasmoid.configuration.updateInterval : 2
+
     // Dynamic plasmoid configuration
     Plasmoid.title: formatTitle()
     toolTipMainText: formatTooltipMain()
@@ -37,11 +45,16 @@ PlasmoidItem {
     // Battery data update timer
     Timer {
         id: updateTimer
-        interval: 2000
+        interval: updateInterval * 1000  // Convert seconds to milliseconds
         running: true
         repeat: true
         triggeredOnStart: true
         onTriggered: updateBatteryData()
+    }
+
+    // Update timer interval when configuration changes
+    onUpdateIntervalChanged: {
+        updateTimer.interval = updateInterval * 1000
     }
 
     // UTILITY FUNCTIONS - Centralized and optimized
@@ -467,7 +480,7 @@ PlasmoidItem {
         function showPopup() { visible = true }
     }
 
-    // COMPACT REPRESENTATION - Optimized single-line display
+    // COMPACT REPRESENTATION - Optimized with configurable position
 
     compactRepresentation: Item {
         Layout.preferredWidth: batteryRow.implicitWidth
@@ -479,6 +492,8 @@ PlasmoidItem {
             id: batteryRow
             anchors.centerIn: parent
             spacing: Kirigami.Units.smallSpacing
+            // KEY FEATURE: Dynamic layout direction based on configuration
+            layoutDirection: showPercentageLeft ? Qt.RightToLeft : Qt.LeftToRight
 
             // Animated battery icon
             Kirigami.Icon {
@@ -504,12 +519,13 @@ PlasmoidItem {
                 }
             }
 
-            // Battery percentage text
+            // Battery percentage text - visibility controlled by configuration
             PlasmaComponents3.Label {
                 text: batteryLevel >= 0 ? batteryLevel + "%" : "?"
                 color: getTextColor()
                 font.pixelSize: Kirigami.Theme.smallFont.pixelSize
                 font.bold: batteryLevel <= 15 && !isCharging
+                visible: showPercentage  // Configuration-controlled visibility
             }
         }
 
@@ -579,6 +595,16 @@ PlasmoidItem {
             }
 
             Item { Layout.fillHeight: true }
+
+            // Configuration status display (debugging/info)
+            PlasmaComponents3.Label {
+                Layout.alignment: Qt.AlignHCenter
+                text: "Position: " + (showPercentageLeft ? "Left" : "Right") + 
+                      " • Show%: " + (showPercentage ? "Yes" : "No") + 
+                      " • Update: " + updateInterval + "s"
+                opacity: 0.6
+                font.pixelSize: Kirigami.Theme.smallFont.pixelSize
+            }
 
             // Settings button
             PlasmaComponents3.Button {
