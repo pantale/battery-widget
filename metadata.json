@@ -1,0 +1,21 @@
+{
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "olivier.pantale@uttop.fr",
+                "Name": "Olivier Pantalé"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "Advanced battery widget with current and estimated time",
+        "Icon": "battery",
+        "Id": "pantale.advanced-battery-widget",
+        "License": "GPL-3.0+",
+        "Name": "Advanced Battery Widget",
+        "Version": "1.0"
+    },
+    "KPackageStructure": "Plasma/Applet",
+    "X-Plasma-API": "declarativeappletscript",
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-MainScript": "ui/main.qml"
+}
