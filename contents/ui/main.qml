@@ -24,8 +24,12 @@ PlasmoidItem {
 
     // Plasmoid configuration with dynamic information
     Plasmoid.title: batteryLevel >= 0 ?
-    "Battery " + batteryLevel + "% • " + timeRemaining :
-    "Battery Unknown"
+        "Battery " + batteryLevel + "% • " + timeRemaining :
+        "Battery Unknown"
+
+    // Configuration du tooltip classique - activé par défaut
+    toolTipMainText: batteryLevel >= 0 ? "Battery " + batteryLevel + "%" : "Battery Unknown"
+    toolTipSubText: detailedInfo
 
     // DataSource for executing system commands
     Plasma5Support.DataSource {
@@ -90,7 +94,6 @@ PlasmoidItem {
         if (batteryLevel === -1) {
             if (!findBatteryPath()) {
                 detailedInfo = "No battery found"
-                updateTooltip()
                 return
             }
         }
@@ -102,7 +105,6 @@ PlasmoidItem {
         } else {
             batteryLevel = -1
             detailedInfo = "Battery information unavailable"
-            updateTooltip()
             return
         }
 
@@ -154,12 +156,15 @@ PlasmoidItem {
 
         // Build detailed information
         buildDetailedInfo()
-        updateTooltip()
 
-        // Dynamic update of plasmoid title
+        // Dynamic update of plasmoid title and tooltip
         Plasmoid.title = batteryLevel >= 0 ?
-        "Battery " + batteryLevel + "% • " + timeRemaining :
-        "Battery Unknown"
+            "Battery " + batteryLevel + "% • " + timeRemaining :
+            "Battery Unknown"
+
+        // Mise à jour du tooltip
+        toolTipMainText = batteryLevel >= 0 ? "Battery " + batteryLevel + "%" : "Battery Unknown"
+        toolTipSubText = detailedInfo
     }
 
     // Calculate remaining time according to Linux formulas
@@ -196,7 +201,7 @@ PlasmoidItem {
         }
     }
 
-    // Build detailed information
+    // Build detailed information for tooltip
     function buildDetailedInfo() {
         var parts = []
 
@@ -214,8 +219,8 @@ PlasmoidItem {
         // Charge/discharge current
         if (currentAmps !== 0) {
             var currentText = isCharging ?
-            "Charge: +" + Math.abs(currentAmps).toFixed(2) + " A" :
-            "Discharge: -" + Math.abs(currentAmps).toFixed(2) + " A"
+                "Charge: +" + Math.abs(currentAmps).toFixed(2) + " A" :
+                "Discharge: -" + Math.abs(currentAmps).toFixed(2) + " A"
             parts.push(currentText)
         }
 
@@ -232,139 +237,284 @@ PlasmoidItem {
         // Estimated time
         if (timeRemaining !== "") {
             var timeText = isCharging ?
-            "Full charge in: " + timeRemaining :
-            "Remaining time: " + timeRemaining
+                "Full charge in: " + timeRemaining :
+                "Remaining time: " + timeRemaining
             parts.push(timeText)
         }
 
-        detailedInfo = parts.join(" • ")
-    }
-
-    function updateTooltip() {
-        Plasmoid.toolTipMainText = batteryLevel >= 0 ?
-        "Battery: " + batteryLevel + "%" :
-        "Battery status unknown"
-        Plasmoid.toolTipSubText = detailedInfo
+        detailedInfo = parts.join("\n")  // Utiliser des retours à la ligne pour le tooltip
     }
 
     function getBatteryIconName() {
         if (batteryLevel < 0) return "battery-missing"
 
-            var iconBase = "battery-"
+        var iconBase = "battery-"
+        // Add level suffix
+        if (batteryLevel <= 10) iconBase += "010"
+        else if (batteryLevel <= 20) iconBase += "020"
+        else if (batteryLevel <= 30) iconBase += "030"
+        else if (batteryLevel <= 40) iconBase += "040"
+        else if (batteryLevel <= 50) iconBase += "050"
+        else if (batteryLevel <= 60) iconBase += "060"
+        else if (batteryLevel <= 70) iconBase += "070"
+        else if (batteryLevel <= 80) iconBase += "080"
+        else if (batteryLevel <= 90) iconBase += "090"
+        else iconBase += "100"
 
-            // Add level suffix
-            if (batteryLevel <= 10) iconBase += "010"
-                else if (batteryLevel <= 20) iconBase += "020"
-                    else if (batteryLevel <= 30) iconBase += "030"
-                        else if (batteryLevel <= 40) iconBase += "040"
-                            else if (batteryLevel <= 50) iconBase += "050"
-                                else if (batteryLevel <= 60) iconBase += "060"
-                                    else if (batteryLevel <= 70) iconBase += "070"
-                                        else if (batteryLevel <= 80) iconBase += "080"
-                                            else if (batteryLevel <= 90) iconBase += "090"
-                                                else iconBase += "100"
+        // Add charging suffix
+        if (isCharging) iconBase += "-charging"
 
-                                                    // Add charging suffix
-                                                    if (isCharging) iconBase += "-charging"
-
-                                                        return iconBase
+        return iconBase
     }
 
     function getTextColor() {
         if (batteryLevel < 0) return Kirigami.Theme.disabledTextColor
-            if (batteryLevel <= 15 && !isCharging) return Kirigami.Theme.negativeTextColor
-                if (batteryLevel <= 25 && !isCharging) return Kirigami.Theme.neutralTextColor
-                    return Kirigami.Theme.textColor
+        if (batteryLevel <= 15 && !isCharging) return Kirigami.Theme.negativeTextColor
+        if (batteryLevel <= 25 && !isCharging) return Kirigami.Theme.neutralTextColor
+        return Kirigami.Theme.textColor
     }
 
-    // Enhanced compact representation
+    // Fenêtre popup personnalisée - ouverte uniquement au clic
+    PlasmaCore.Dialog {
+        id: detailsPopup
+
+        // Propriétés de la fenêtre
+        type: PlasmaCore.Dialog.PopupMenu
+        location: PlasmaCore.Types.Floating
+        hideOnWindowDeactivate: true
+
+        // Contenu ajouté comme enfant direct
+        ColumnLayout {
+            id: popupContent
+            width: Kirigami.Units.gridUnit * 18
+            height: Kirigami.Units.gridUnit * 14
+            spacing: Kirigami.Units.largeSpacing
+
+            // Header avec icône et niveau
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: Kirigami.Units.largeSpacing
+
+                Kirigami.Icon {
+                    source: getBatteryIconName()
+                    width: Kirigami.Units.iconSizes.large
+                    height: Kirigami.Units.iconSizes.large
+                }
+
+                ColumnLayout {
+                    PlasmaComponents3.Label {
+                        text: batteryLevel >= 0 ? batteryLevel + "%" : "Unknown"
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 2.2
+                        font.bold: true
+                        color: getTextColor()
+                    }
+                    PlasmaComponents3.Label {
+                        text: isCharging ? "🔌 Charging" :
+                            (batteryLevel === 100 ? "✓ Fully charged" : "🔋 On battery")
+                        opacity: 0.9
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                    }
+                }
+            }
+
+            // Barre de progression avec couleur dynamique
+            PlasmaComponents3.ProgressBar {
+                Layout.fillWidth: true
+                from: 0
+                to: 100
+                value: Math.max(0, batteryLevel)
+
+                // Couleur de la barre selon le niveau
+                Rectangle {
+                    anchors.fill: parent
+                    color: "transparent"
+                    border.width: 1
+                    border.color: Kirigami.Theme.disabledTextColor
+                    opacity: 0.3
+                    radius: 3
+                }
+            }
+
+            // Informations détaillées en grille plus espacée
+            GridLayout {
+                Layout.fillWidth: true
+                columns: 2
+                columnSpacing: Kirigami.Units.largeSpacing * 1.5
+                rowSpacing: Kirigami.Units.largeSpacing
+
+                // Current
+                PlasmaComponents3.Label {
+                    text: "⚡ Current:"
+                    font.bold: true
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                }
+                PlasmaComponents3.Label {
+                    text: currentAmps !== 0 ?
+                        (isCharging ? "+" : "-") + Math.abs(currentAmps).toFixed(2) + " A" :
+                        "Unknown"
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                    color: currentAmps !== 0 ? Kirigami.Theme.textColor : Kirigami.Theme.disabledTextColor
+                }
+
+                // Power
+                PlasmaComponents3.Label {
+                    text: "💡 Power:"
+                    font.bold: true
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                }
+                PlasmaComponents3.Label {
+                    text: powerWatts > 0.1 ? powerWatts.toFixed(1) + " W" : "Unknown"
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                    color: powerWatts > 0.1 ? Kirigami.Theme.textColor : Kirigami.Theme.disabledTextColor
+                }
+
+                // Voltage
+                PlasmaComponents3.Label {
+                    text: "🔌 Voltage:"
+                    font.bold: true
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                }
+                PlasmaComponents3.Label {
+                    text: voltageVolts > 0 ? voltageVolts.toFixed(1) + " V" : "Unknown"
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                    color: voltageVolts > 0 ? Kirigami.Theme.textColor : Kirigami.Theme.disabledTextColor
+                }
+
+                // Remaining time
+                PlasmaComponents3.Label {
+                    text: isCharging ? "⏱️ Full charge:" : "⏰ Battery life:"
+                    font.bold: true
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                }
+                PlasmaComponents3.Label {
+                    text: timeRemaining || "Cannot calculate"
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                    color: timeRemaining && timeRemaining.includes("min") ? 
+                           (batteryLevel <= 15 ? Kirigami.Theme.negativeTextColor : Kirigami.Theme.neutralTextColor) :
+                           Kirigami.Theme.textColor
+                    font.bold: batteryLevel <= 15 && !isCharging
+                }
+
+                // Capacities
+                PlasmaComponents3.Label {
+                    text: "🔋 Capacity:"
+                    font.bold: true
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                }
+                PlasmaComponents3.Label {
+                    text: chargeNowAh > 0 && chargeFullAh > 0 ?
+                        chargeNowAh.toFixed(1) + " / " + chargeFullAh.toFixed(1) + " Ah (" + 
+                        Math.round((chargeNowAh / chargeFullAh) * 100) + "%)" :
+                        "Unknown"
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                    color: chargeNowAh > 0 ? Kirigami.Theme.textColor : Kirigami.Theme.disabledTextColor
+                }
+            }
+
+            Item { Layout.fillHeight: true }
+
+            // Ligne de boutons
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: Kirigami.Units.largeSpacing
+
+                // Bouton pour fermer
+                PlasmaComponents3.Button {
+                    text: "Close"
+                    icon.name: "window-close"
+                    onClicked: {
+                        detailsPopup.visible = false
+                    }
+                }
+
+                // Bouton pour ouvrir les paramètres
+                PlasmaComponents3.Button {
+                    text: "Power Settings..."
+                    icon.name: "preferences-system-power-management"
+                    onClicked: {
+                        executable.exec("kcmshell6 kcm_powerdevilprofilesconfig")
+                        detailsPopup.visible = false
+                    }
+                }
+            }
+        }
+
+        // Fonction pour afficher la popup (clic uniquement)
+        function showPopup() {
+            visible = true
+        }
+    }
+
+    // Compact representation simplifiée - UNE SEULE LIGNE
     compactRepresentation: Item {
+        id: compactItem
         Layout.preferredWidth: batteryRow.implicitWidth
         Layout.preferredHeight: batteryRow.implicitHeight
         Layout.minimumWidth: batteryRow.implicitWidth
         Layout.minimumHeight: Layout.preferredHeight
 
-        ColumnLayout {
+        // Une seule ligne : icône + pourcentage
+        RowLayout {
+            id: batteryRow
             anchors.centerIn: parent
-            spacing: 1
+            spacing: Kirigami.Units.smallSpacing
 
-            // Main line: icon + percentage
-            RowLayout {
-                id: batteryRow
-                Layout.alignment: Qt.AlignHCenter
-                spacing: Kirigami.Units.smallSpacing
+            // Battery icon
+            Kirigami.Icon {
+                id: batteryIcon
+                source: getBatteryIconName()
+                width: Kirigami.Units.iconSizes.small
+                height: Kirigami.Units.iconSizes.small
+                color: getTextColor()
 
-                // Battery icon
-                Kirigami.Icon {
-                    id: batteryIcon
-                    source: getBatteryIconName()
-                    width: Kirigami.Units.iconSizes.small
-                    height: Kirigami.Units.iconSizes.small
-                    color: getTextColor()
-
-                    // Pulsation animation while charging
-                    SequentialAnimation on opacity {
-                        running: isCharging && batteryLevel < 100
-                        loops: Animation.Infinite
-                        NumberAnimation {
-                            to: 0.6
-                            duration: 1000
-                            easing.type: Easing.InOutQuad
-                        }
-                        NumberAnimation {
-                            to: 1.0
-                            duration: 1000
-                            easing.type: Easing.InOutQuad
-                        }
+                // Pulsation animation while charging
+                SequentialAnimation on opacity {
+                    running: isCharging && batteryLevel < 100
+                    loops: Animation.Infinite
+                    NumberAnimation {
+                        to: 0.6
+                        duration: 1000
+                        easing.type: Easing.InOutQuad
                     }
-                }
-
-                // Percentage text
-                PlasmaComponents3.Label {
-                    id: batteryText
-                    text: batteryLevel >= 0 ? batteryLevel + "%" : "?"
-                    color: getTextColor()
-                    font.pixelSize: Kirigami.Theme.smallFont.pixelSize
-                    font.bold: batteryLevel <= 15 && !isCharging
+                    NumberAnimation {
+                        to: 1.0
+                        duration: 1000
+                        easing.type: Easing.InOutQuad
+                    }
                 }
             }
 
-            // Secondary line: compact detailed information
+            // Percentage text uniquement
             PlasmaComponents3.Label {
-                id: compactDetails
-                Layout.alignment: Qt.AlignHCenter
-                text: {
-                    var parts = []
-                    if (currentAmps !== 0) {
-                        parts.push((isCharging ? "+" : "-") + Math.abs(currentAmps).toFixed(1) + "A")
-                    }
-                    if (timeRemaining && timeRemaining !== "Unknown time") {
-                        parts.push(timeRemaining)
-                    }
-                    return parts.join(" • ")
-                }
+                id: batteryText
+                text: batteryLevel >= 0 ? batteryLevel + "%" : "?"
                 color: getTextColor()
-                opacity: 0.8
-                font.pixelSize: Math.round(Kirigami.Theme.smallFont.pixelSize * 0.8)
-                visible: text !== ""
-                elide: Text.ElideRight
-                Layout.maximumWidth: 100
+                font.pixelSize: Kirigami.Theme.smallFont.pixelSize
+                font.bold: batteryLevel <= 15 && !isCharging
             }
         }
 
-        // Clickable area to open power settings
+        // MouseArea pour le clic uniquement - pas de gestion du survol
         MouseArea {
+            id: mouseArea
             anchors.fill: parent
+            hoverEnabled: false  // Désactivé pour laisser le tooltip standard
+
             onClicked: {
-                executable.exec("kcmshell6 kcm_powerdevilprofilesconfig")
+                // Toggle de la popup au clic
+                if (detailsPopup.visible) {
+                    detailsPopup.visible = false
+                } else {
+                    detailsPopup.showPopup()
+                }
             }
         }
     }
 
-    // Full representation with all information
+    // Full representation pour compatibilité (utilisée quand le widget est étendu)
     fullRepresentation: PlasmaComponents3.Page {
-        Layout.preferredWidth: Kirigami.Units.gridUnit * 16
-        Layout.preferredHeight: Kirigami.Units.gridUnit * 12
+        Layout.preferredWidth: Kirigami.Units.gridUnit * 18
+        Layout.preferredHeight: Kirigami.Units.gridUnit * 14
 
         ColumnLayout {
             anchors.fill: parent
@@ -390,7 +540,7 @@ PlasmoidItem {
                     }
                     PlasmaComponents3.Label {
                         text: isCharging ? "Charging" :
-                        (batteryLevel === 100 ? "Charged" : "On battery")
+                            (batteryLevel === 100 ? "Charged" : "On battery")
                         opacity: 0.8
                     }
                 }
@@ -417,8 +567,8 @@ PlasmoidItem {
                 }
                 PlasmaComponents3.Label {
                     text: currentAmps !== 0 ?
-                    (isCharging ? "+" : "-") + Math.abs(currentAmps).toFixed(2) + " A" :
-                    "Unknown"
+                        (isCharging ? "+" : "-") + Math.abs(currentAmps).toFixed(2) + " A" :
+                        "Unknown"
                 }
 
                 // Power
@@ -446,7 +596,8 @@ PlasmoidItem {
                 }
                 PlasmaComponents3.Label {
                     text: timeRemaining || "Cannot calculate"
-                    color: timeRemaining.includes("min") ? Kirigami.Theme.neutralTextColor : Kirigami.Theme.textColor
+                    color: timeRemaining && timeRemaining.includes("min") ? 
+                           Kirigami.Theme.neutralTextColor : Kirigami.Theme.textColor
                 }
 
                 // Capacities
@@ -456,8 +607,8 @@ PlasmoidItem {
                 }
                 PlasmaComponents3.Label {
                     text: chargeNowAh > 0 && chargeFullAh > 0 ?
-                    chargeNowAh.toFixed(1) + " / " + chargeFullAh.toFixed(1) + " Ah" :
-                    "Unknown"
+                        chargeNowAh.toFixed(1) + " / " + chargeFullAh.toFixed(1) + " Ah" :
+                        "Unknown"
                 }
             }
 
