@@ -4,6 +4,7 @@ import org.kde.plasma.plasmoid
 import org.kde.plasma.core as PlasmaCore
 import org.kde.kirigami as Kirigami
 import org.kde.plasma.components as PlasmaComponents3
+import org.kde.plasma.plasma5support as Plasma5Support
 
 PlasmoidItem {
     id: root
@@ -17,7 +18,7 @@ PlasmoidItem {
     property real powerWatts: 0.0           // Power in watts
     property real chargeNowAh: 0.0          // Current charge in Ah
     property real chargeFullAh: 0.0         // Full charge in Ah
-    property string timeRemaining: ""        // Formatted remaining time
+    property string timeRemaining: ""       // Formatted remaining time
     property string batteryPath: "/sys/class/power_supply/BAT0"
     property string detailedInfo: ""        // Detailed information
 
@@ -25,6 +26,20 @@ PlasmoidItem {
     Plasmoid.title: batteryLevel >= 0 ?
     "Battery " + batteryLevel + "% • " + timeRemaining :
     "Battery Unknown"
+
+    // DataSource for executing system commands
+    Plasma5Support.DataSource {
+        id: executable
+        engine: "executable"
+        connectedSources: []
+        onNewData: function(source, data) {
+            disconnectSource(source)
+        }
+
+        function exec(cmd) {
+            executable.connectSource(cmd)
+        }
+    }
 
     // Timer for data updates
     Timer {
@@ -127,7 +142,6 @@ PlasmoidItem {
         // Read capacities for time calculation
         var chargeNowStr = readSystemFile(batteryPath + "/charge_now")
         var chargeFullStr = readSystemFile(batteryPath + "/charge_full")
-
         if (chargeNowStr !== "" && chargeFullStr !== "") {
             chargeNowAh = parseInt(chargeNowStr) / 1000000.0  // µAh → Ah
             chargeFullAh = parseInt(chargeFullStr) / 1000000.0 // µAh → Ah
@@ -265,7 +279,6 @@ PlasmoidItem {
 
     // Enhanced compact representation
     compactRepresentation: Item {
-//        Layout.preferredWidth: Math.max(batteryRow.implicitWidth, 120)
         Layout.preferredWidth: batteryRow.implicitWidth
         Layout.preferredHeight: batteryRow.implicitHeight
         Layout.minimumWidth: batteryRow.implicitWidth
@@ -343,7 +356,7 @@ PlasmoidItem {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                PlasmaCore.KRun.openSystemSettings("kcm_powerdevilprofilesconfig")
+                executable.exec("kcmshell6 kcm_powerdevilprofilesconfig")
             }
         }
     }
@@ -456,7 +469,7 @@ PlasmoidItem {
                 text: "Power Settings..."
                 icon.name: "preferences-system-power-management"
                 onClicked: {
-                    PlasmaCore.KRun.openSystemSettings("kcm_powerdevilprofilesconfig")
+                    executable.exec("kcmshell6 kcm_powerdevilprofilesconfig")
                     root.expanded = false
                 }
             }
