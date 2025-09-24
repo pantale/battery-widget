@@ -620,17 +620,6 @@ PlasmoidItem {
 
             Item { Layout.fillHeight: true }
 
-            // Configuration status display (debugging/info)
-            PlasmaComponents3.Label {
-                Layout.alignment: Qt.AlignHCenter
-                text: "Position: " + (showPercentageLeft ? "Left" : "Right") + 
-                      " • Show%: " + (showPercentage ? "Yes" : "No") + 
-                      " • Rotated: " + (rotateBatteryIcon ? "Yes" : "No") + 
-                      " • Update: " + updateInterval + "s"
-                opacity: 0.6
-                font.pixelSize: Kirigami.Theme.smallFont.pixelSize
-            }
-
             // Settings button
             PlasmaComponents3.Button {
                 Layout.alignment: Qt.AlignHCenter
