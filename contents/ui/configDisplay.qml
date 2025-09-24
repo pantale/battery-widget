@@ -11,6 +11,7 @@ Kirigami.FormLayout {
     property alias cfg_showPercentageLeft: showPercentageLeft.checked
     property alias cfg_updateInterval: updateInterval.value
     property alias cfg_rotateBatteryIcon: rotateBatteryIcon.checked
+    property alias cfg_batterySpacing: batterySpacing.value
 
     // GENERAL SETTINGS SECTION
     Item {
@@ -43,6 +44,7 @@ Kirigami.FormLayout {
             from: 1
             to: 60
             stepSize: 1
+            textFromValue: function(value) { return value.toString() }
         }
         
         QQC2.Label {
@@ -95,6 +97,40 @@ Kirigami.FormLayout {
                     }
                 }
             }
+            
+            // Spacing between icon and percentage
+            Item {
+                Layout.preferredHeight: Kirigami.Units.smallSpacing
+            }
+            
+            RowLayout {
+                spacing: Kirigami.Units.smallSpacing
+                
+                QQC2.Label {
+                    text: i18n("Spacing:")
+                }
+                
+                QQC2.SpinBox {
+                    id: batterySpacing
+                    from: 0
+                    to: 20
+                    stepSize: 1
+                    textFromValue: function(value) { 
+                        return value + " px" 
+                    }
+                    valueFromText: function(text) { 
+                        return parseInt(text.replace(" px", "")) 
+                    }
+                }
+            }
+            
+            QQC2.Label {
+                Layout.fillWidth: true
+                text: i18n("Distance between battery icon and percentage text (0-20 pixels)")
+                font.pointSize: Kirigami.Theme.smallFont.pointSize
+                opacity: 0.6
+                wrapMode: Text.WordWrap
+            }
         }
     }
 
@@ -104,7 +140,7 @@ Kirigami.FormLayout {
         Kirigami.FormData.label: i18n("Preview")
     }
 
-    // Live preview of the widget appearance with rotation
+    // Live preview of the widget appearance with rotation and configurable spacing
     Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: Kirigami.Units.gridUnit * 2
@@ -115,7 +151,7 @@ Kirigami.FormLayout {
 
         RowLayout {
             anchors.centerIn: parent
-            spacing: Kirigami.Units.smallSpacing
+            spacing: batterySpacing.value  // Use configurable spacing
             layoutDirection: showPercentageLeft.checked ? Qt.RightToLeft : Qt.LeftToRight
 
             Kirigami.Icon {

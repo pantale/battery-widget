@@ -29,6 +29,8 @@ PlasmoidItem {
                                      Plasmoid.configuration.rotateBatteryIcon : false
     property int updateInterval: Plasmoid.configuration.updateInterval !== undefined ? 
                                  Plasmoid.configuration.updateInterval : 2
+    property int batterySpacing: Plasmoid.configuration.batterySpacing !== undefined ? 
+                                 Plasmoid.configuration.batterySpacing : Kirigami.Units.smallSpacing
 
     // Dynamic plasmoid configuration
     Plasmoid.title: formatTitle()
@@ -493,7 +495,7 @@ PlasmoidItem {
         function showPopup() { visible = true }
     }
 
-    // COMPACT REPRESENTATION - Optimized with configurable position and rotation
+    // COMPACT REPRESENTATION - Optimized with configurable position, rotation and spacing
 
     compactRepresentation: Item {
         Layout.preferredWidth: batteryRow.implicitWidth
@@ -504,7 +506,7 @@ PlasmoidItem {
         RowLayout {
             id: batteryRow
             anchors.centerIn: parent
-            spacing: Kirigami.Units.smallSpacing
+            spacing: batterySpacing  // Use configurable spacing instead of fixed Kirigami.Units.smallSpacing
             // Dynamic layout direction based on configuration
             layoutDirection: showPercentageLeft ? Qt.RightToLeft : Qt.LeftToRight
 
