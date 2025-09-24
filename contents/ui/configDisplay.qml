@@ -29,6 +29,11 @@ Kirigami.FormLayout {
         text: i18n("Rotate battery icon by 180°")
     }
     
+    // Espacement vertical après l'explication de l'update interval
+    Item {
+        Layout.preferredHeight: Kirigami.Units.largeSpacing
+    }
+    
     RowLayout {
         Kirigami.FormData.label: i18n("Update interval:")
         spacing: Kirigami.Units.smallSpacing
@@ -55,10 +60,9 @@ Kirigami.FormLayout {
         Layout.maximumWidth: Kirigami.Units.gridUnit * 25
     }
 
-    // POSITION SETTINGS SECTION
+    // Espacement vertical avant la GroupBox
     Item {
-        Kirigami.FormData.isSection: true
-        Kirigami.FormData.label: i18n("Position Settings")
+        Layout.preferredHeight: Kirigami.Units.largeSpacing
     }
 
     QQC2.GroupBox {
