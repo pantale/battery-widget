@@ -7,11 +7,11 @@
             }
         ],
         "Category": "System Information",
-        "Description": "Advanced battery widget with current and estimated time",
+        "Description": "Battery widget with current and estimated time",
         "Icon": "battery",
-        "Id": "pantale.advanced-battery-widget",
+        "Id": "battery-widget",
         "License": "GPL-3.0+",
-        "Name": "Advanced Battery Widget",
+        "Name": "Battery Widget",
         "Version": "1.0"
     },
     "KPackageStructure": "Plasma/Applet",
