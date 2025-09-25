@@ -44,6 +44,7 @@ Kirigami.FormLayout {
             from: 1
             to: 60
             stepSize: 1
+            value: plasmoid.configuration.updateInterval || 2  // Initialisation avec valeur par défaut
             textFromValue: function(value) { return value.toString() }
         }
         
@@ -115,6 +116,7 @@ Kirigami.FormLayout {
                     from: 0
                     to: 20
                     stepSize: 1
+                    value: plasmoid.configuration.batterySpacing || 4  // Initialisation avec valeur par défaut
                     textFromValue: function(value) { 
                         return value + " px" 
                     }
