@@ -67,7 +67,7 @@ Kirigami.FormLayout {
     /*
      * Update interval configuration
      * Controls how frequently the widget queries UPower for battery data
-     * Range: 1-60 seconds with 2-second default
+     * Range: 1-120 seconds with 30-second default
      */
     RowLayout {
         Kirigami.FormData.label: i18n("Update interval:")
@@ -76,9 +76,9 @@ Kirigami.FormLayout {
         QQC2.SpinBox {
             id: updateInterval
             from: 1                              // Minimum: 1 second
-            to: 60                               // Maximum: 60 seconds
+            to: 120                              // Maximum: 120 seconds
             stepSize: 1                          // Increment by 1 second
-            value: plasmoid.configuration.updateInterval || 2  // Default: 2 seconds
+            value: plasmoid.configuration.updateInterval || 30  // Default: 30 seconds
             textFromValue: function(value) { 
                 return value.toString() 
             }
@@ -173,7 +173,7 @@ Kirigami.FormLayout {
                     from: 0                          // Minimum: no spacing
                     to: 20                           // Maximum: 20 pixels
                     stepSize: 1                      // Increment by 1 pixel
-                    value: plasmoid.configuration.batterySpacing || 4  // Default: 4 pixels
+                    value: plasmoid.configuration.batterySpacing || 5  // Default: 5 pixels
                     textFromValue: function(value) { 
                         return value + " px" 
                     }

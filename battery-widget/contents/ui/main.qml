@@ -58,9 +58,9 @@ PlasmoidItem {
     property bool rotateBatteryIcon: Plasmoid.configuration.rotateBatteryIcon !== undefined ? 
                                      Plasmoid.configuration.rotateBatteryIcon : false
     property int updateInterval: Plasmoid.configuration.updateInterval !== undefined ? 
-                                 Plasmoid.configuration.updateInterval : 2
+                                 Plasmoid.configuration.updateInterval : 30
     property int batterySpacing: Plasmoid.configuration.batterySpacing !== undefined ? 
-                                 Plasmoid.configuration.batterySpacing : Kirigami.Units.smallSpacing
+                                 Plasmoid.configuration.batterySpacing : 5
 
     // ===== DYNAMIC PLASMOID PROPERTIES =====
     // These are updated automatically when battery data changes
