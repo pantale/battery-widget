@@ -1,4 +1,4 @@
-# Advanced Battery Widget for KDE Plasma 6
+# Battery Widget for KDE Plasma 6.x
 
 A comprehensive battery monitoring widget for KDE Plasma 6 that provides detailed battery information using UPower, the standard Linux power management service.
 

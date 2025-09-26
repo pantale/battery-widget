@@ -16,9 +16,15 @@
         </entry>
         <entry name="updateInterval" type="Int">
             <label>Update interval in seconds</label>
-            <default>2</default>
+            <default>30</default>
             <min>1</min>
-            <max>60</max>
+            <max>120</max>
+        </entry>
+        <entry name="batterySpacing" type="Int">
+            <label>Battery spacing in pixels</label>
+            <default>5</default>
+            <min>0</min>
+            <max>20</max>
         </entry>
         <entry name="rotateBatteryIcon" type="Bool">
             <label>Rotate battery icon by 180 degrees</label>

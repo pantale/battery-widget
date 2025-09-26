@@ -9,7 +9,7 @@
  * - Display toggle for battery percentage
  * - Configurable percentage position (left/right of icon)
  * - Battery icon rotation option
- * - Adjustable update interval (1-60 seconds)
+ * - Adjustable update interval (1-120 seconds)
  * - Spacing configuration between icon and text
  * - Real-time preview of widget appearance
  * - Technical information about UPower integration
@@ -48,6 +48,7 @@ Kirigami.FormLayout {
         id: showPercentage
         Kirigami.FormData.label: i18n("Display:")
         text: i18n("Show battery percentage")
+//        checked: plasmoid.configuration.showPercentage !== undefined ? plasmoid.configuration.showPercentage : true
     }
 
     /*
@@ -57,6 +58,7 @@ Kirigami.FormLayout {
     QQC2.CheckBox {
         id: rotateBatteryIcon
         text: i18n("Rotate battery icon by 180°")
+//        checked: plasmoid.configuration.rotateBatteryIcon !== undefined ? plasmoid.configuration.rotateBatteryIcon : false
     }
 
     // Vertical spacing for visual separation
@@ -96,7 +98,7 @@ Kirigami.FormLayout {
      */
     QQC2.Label {
         Layout.fillWidth: true
-        text: i18n("Lower values provide more frequent battery updates but may increase CPU usage. UPower is used to retrieve battery data in a more robust and standardized way than reading system files directly.")
+        text: i18n("Lower values provide more frequent battery updates but may increase CPU usage.")
         font.pointSize: Kirigami.Theme.smallFont.pointSize
         opacity: 0.6
         wrapMode: Text.WordWrap
@@ -129,10 +131,10 @@ Kirigami.FormLayout {
             QQC2.RadioButton {
                 id: showPercentageRight
                 text: i18n("Show percentage to the right of icon")
-                checked: !page.cfg_showPercentageLeft  // Default position
+                checked: !showPercentageLeft.checked  // Default position
                 onToggled: {
                     if (checked) {
-                        page.cfg_showPercentageLeft = false
+                        showPercentageLeft.checked = false
                     }
                 }
             }
@@ -144,10 +146,10 @@ Kirigami.FormLayout {
             QQC2.RadioButton {
                 id: showPercentageLeft
                 text: i18n("Show percentage to the left of icon")
-                checked: page.cfg_showPercentageLeft
+                checked: plasmoid.configuration.showPercentageLeft !== undefined ? plasmoid.configuration.showPercentageLeft : false
                 onToggled: {
                     if (checked) {
-                        page.cfg_showPercentageLeft = true
+                        showPercentageRight.checked = false
                     }
                 }
             }
@@ -175,11 +177,13 @@ Kirigami.FormLayout {
                     stepSize: 1                      // Increment by 1 pixel
                     value: plasmoid.configuration.batterySpacing || 5  // Default: 5 pixels
                     textFromValue: function(value) { 
-                        return value + " px" 
+                        return value.toString() 
                     }
-                    valueFromText: function(text) { 
-                        return parseInt(text.replace(" px", "")) 
-                    }
+                }
+                
+                QQC2.Label {
+                    text: i18n("px")
+                    color: Kirigami.Theme.textColor
                 }
             }
 
@@ -196,7 +200,6 @@ Kirigami.FormLayout {
             }
         }
     }
-
 
     // ===== LIVE PREVIEW SECTION =====
     Item {
@@ -261,7 +264,7 @@ Kirigami.FormLayout {
      */
     QQC2.Label {
         Layout.fillWidth: true
-        text: i18n("This preview shows how your battery widget will appear in the panel. The 180° rotation can be useful for different visual orientations. Data is retrieved via UPower for better accuracy and reliability.")
+        text: i18n("This preview shows how your battery widget will appear in the panel.\nThe 180° rotation can be useful for different visual orientations.")
         font.pointSize: Kirigami.Theme.smallFont.pointSize
         opacity: 0.6
         wrapMode: Text.WordWrap
