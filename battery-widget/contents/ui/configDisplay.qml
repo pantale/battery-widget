@@ -1,10 +1,10 @@
 /*
  * Configuration Interface for Advanced Battery Widget
- * 
+ *
  * This file provides the configuration UI for the battery widget,
  * allowing users to customize display options, update intervals,
  * and visual preferences through Plasma's settings system.
- * 
+ *
  * Features:
  * - Display toggle for battery percentage
  * - Configurable percentage position (left/right of icon)
@@ -13,7 +13,7 @@
  * - Spacing configuration between icon and text
  * - Real-time preview of widget appearance
  * - Technical information about UPower integration
- * 
+ *
  * Author: Battery Widget Team
  * License: GPL v3+
  */
@@ -33,6 +33,7 @@ Kirigami.FormLayout {
     property alias cfg_updateInterval: updateInterval.value
     property alias cfg_rotateBatteryIcon: rotateBatteryIcon.checked
     property alias cfg_batterySpacing: batterySpacing.value
+    property alias cfg_percentageFontSize: percentageFontSize.value
 
     // ===== GENERAL SETTINGS SECTION =====
     Item {
@@ -48,7 +49,6 @@ Kirigami.FormLayout {
         id: showPercentage
         Kirigami.FormData.label: i18n("Display:")
         text: i18n("Show battery percentage")
-//        checked: plasmoid.configuration.showPercentage !== undefined ? plasmoid.configuration.showPercentage : true
     }
 
     /*
@@ -58,7 +58,6 @@ Kirigami.FormLayout {
     QQC2.CheckBox {
         id: rotateBatteryIcon
         text: i18n("Rotate battery icon by 180°")
-//        checked: plasmoid.configuration.rotateBatteryIcon !== undefined ? plasmoid.configuration.rotateBatteryIcon : false
     }
 
     // Vertical spacing for visual separation
@@ -81,8 +80,8 @@ Kirigami.FormLayout {
             to: 120                              // Maximum: 120 seconds
             stepSize: 1                          // Increment by 1 second
             value: plasmoid.configuration.updateInterval || 30  // Default: 30 seconds
-            textFromValue: function(value) { 
-                return value.toString() 
+            textFromValue: function(value) {
+                return value.toString()
             }
         }
 
@@ -146,7 +145,8 @@ Kirigami.FormLayout {
             QQC2.RadioButton {
                 id: showPercentageLeft
                 text: i18n("Show percentage to the left of icon")
-                checked: plasmoid.configuration.showPercentageLeft !== undefined ? plasmoid.configuration.showPercentageLeft : false
+                checked: plasmoid.configuration.showPercentageLeft !== undefined ?
+                         plasmoid.configuration.showPercentageLeft : false
                 onToggled: {
                     if (checked) {
                         showPercentageRight.checked = false
@@ -157,6 +157,36 @@ Kirigami.FormLayout {
             // Small spacing before spacing control
             Item {
                 Layout.preferredHeight: Kirigami.Units.smallSpacing
+            }
+
+            /*
+             * Font size configuration for percentage text
+             * Explains the pixel range and its effect (6-32 pixels)
+             */
+            RowLayout {
+                spacing: Kirigami.Units.smallSpacing
+
+                QQC2.Label {
+                    text: i18n("Font size:")
+                }
+
+                QQC2.SpinBox {
+                    id: percentageFontSize
+                    from: 6                          // Minimum: 6 pixels
+                    to: 32                           // Maximum: 32 pixels
+                    stepSize: 1
+                    value: plasmoid.configuration.percentageFontSize !== undefined ?
+                           plasmoid.configuration.percentageFontSize :
+                           Kirigami.Theme.smallFont.pixelSize
+                    textFromValue: function(value) {
+                        return value.toString()
+                    }
+                }
+
+                QQC2.Label {
+                    text: i18n("px")
+                    color: Kirigami.Theme.textColor
+                }
             }
 
             /*
@@ -176,15 +206,27 @@ Kirigami.FormLayout {
                     to: 20                           // Maximum: 20 pixels
                     stepSize: 1                      // Increment by 1 pixel
                     value: plasmoid.configuration.batterySpacing || 5  // Default: 5 pixels
-                    textFromValue: function(value) { 
-                        return value.toString() 
+                    textFromValue: function(value) {
+                        return value.toString()
                     }
                 }
-                
+
                 QQC2.Label {
                     text: i18n("px")
                     color: Kirigami.Theme.textColor
                 }
+            }
+
+            /*
+             * Help text for font size configuration
+             * Explains the pixel range and its effect (6-32 pixels)
+             */
+            QQC2.Label {
+                Layout.fillWidth: true
+                text: i18n("Font size of the battery percentage text (6-32 pixels)")
+                font.pointSize: Kirigami.Theme.smallFont.pointSize
+                opacity: 0.6
+                wrapMode: Text.WordWrap
             }
 
             /*
@@ -253,7 +295,7 @@ Kirigami.FormLayout {
             QQC2.Label {
                 text: "60%"  // Representative percentage for preview
                 visible: showPercentage.checked  // Live visibility preview
-                font.pixelSize: Kirigami.Theme.smallFont.pixelSize
+                font.pixelSize: percentageFontSize.value
             }
         }
     }
@@ -280,3 +322,4 @@ Kirigami.FormLayout {
         Layout.fillHeight: true
     }
 }
+

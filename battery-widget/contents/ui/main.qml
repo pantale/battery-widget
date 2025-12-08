@@ -1,10 +1,10 @@
 /*
  * Advanced Battery Widget for KDE Plasma 6
- * 
+ *
  * This plasmoid provides comprehensive battery monitoring using UPower,
  * the standard Linux power management service. It offers detailed battery
  * information including health, charge rates, and estimated time remaining.
- * 
+ *
  * Features:
  * - Real-time battery monitoring via UPower
  * - Configurable update intervals and display options
@@ -13,7 +13,7 @@
  * - Support for both energy (Wh) and charge (Ah) data
  * - Automatic battery device detection
  * - Multi-language decimal format support (comma/dot)
- * 
+ *
  * Author: Battery Widget Team
  * License: GPL v3+
  * Dependencies: UPower, Plasma 6, Qt 6
@@ -51,16 +51,20 @@ PlasmoidItem {
 
     // ===== CONFIGURATION PROPERTIES =====
     // These bind to Plasmoid.configuration values with sensible defaults
-    property bool showPercentage: Plasmoid.configuration.showPercentage !== undefined ? 
+    property bool showPercentage: Plasmoid.configuration.showPercentage !== undefined ?
                                   Plasmoid.configuration.showPercentage : true
-    property bool showPercentageLeft: Plasmoid.configuration.showPercentageLeft !== undefined ? 
+    property bool showPercentageLeft: Plasmoid.configuration.showPercentageLeft !== undefined ?
                                       Plasmoid.configuration.showPercentageLeft : false
-    property bool rotateBatteryIcon: Plasmoid.configuration.rotateBatteryIcon !== undefined ? 
+    property bool rotateBatteryIcon: Plasmoid.configuration.rotateBatteryIcon !== undefined ?
                                      Plasmoid.configuration.rotateBatteryIcon : false
-    property int updateInterval: Plasmoid.configuration.updateInterval !== undefined ? 
+    property int updateInterval: Plasmoid.configuration.updateInterval !== undefined ?
                                  Plasmoid.configuration.updateInterval : 30
-    property int batterySpacing: Plasmoid.configuration.batterySpacing !== undefined ? 
+    property int batterySpacing: Plasmoid.configuration.batterySpacing !== undefined ?
                                  Plasmoid.configuration.batterySpacing : 5
+
+    // Nouvelle propriété : taille de police du pourcentage (en pixels)
+    property int percentageFontSize: Plasmoid.configuration.percentageFontSize !== undefined ?
+                                     Plasmoid.configuration.percentageFontSize : Kirigami.Theme.smallFont.pixelSize
 
     // ===== DYNAMIC PLASMOID PROPERTIES =====
     // These are updated automatically when battery data changes
@@ -129,7 +133,7 @@ PlasmoidItem {
         interval: updateInterval * 1000  // Convert seconds to milliseconds
         running: true                    // Start automatically
         repeat: true                     // Run continuously
-        triggeredOnStart: true          // Execute immediately on startup
+        triggeredOnStart: true           // Execute immediately on startup
         onTriggered: updateBatteryData()
     }
 
@@ -327,8 +331,8 @@ PlasmoidItem {
             var percentage = Math.round((energyNowWh / energyFullWh) * 100)
             return energyNowWh.toFixed(1) + " / " + energyFullWh.toFixed(1) + " Wh (" + percentage + "%)"
         } else if (chargeNowAh > 0 && chargeFullAh > 0) {
-            var percentage = Math.round((chargeNowAh / chargeFullAh) * 100)
-            return chargeNowAh.toFixed(1) + " / " + chargeFullAh.toFixed(1) + " Ah (" + percentage + "%)"
+            var percentage2 = Math.round((chargeNowAh / chargeFullAh) * 100)
+            return chargeNowAh.toFixed(1) + " / " + chargeFullAh.toFixed(1) + " Ah (" + percentage2 + "%)"
         }
         return "Unknown"
     }
@@ -416,8 +420,8 @@ PlasmoidItem {
 
         // Current information
         if (Math.abs(currentAmps) > 0.01) {
-            parts.push((isCharging ? "Charge: +" : "Discharge: -") + 
-                      Math.abs(currentAmps).toFixed(2) + " A")
+            parts.push((isCharging ? "Charge: +" : "Discharge: -") +
+                       Math.abs(currentAmps).toFixed(2) + " A")
         }
 
         // Power and voltage
@@ -557,7 +561,7 @@ PlasmoidItem {
             PlasmaComponents3.Label {
                 text: batteryLevel >= 0 && isPresent ? batteryLevel + "%" : "?"
                 color: getTextColor()
-                font.pixelSize: Kirigami.Theme.smallFont.pixelSize
+                font.pixelSize: percentageFontSize   // Utilise la taille configurable
                 font.bold: batteryLevel <= 15 && !isCharging && isPresent  // Bold for low battery warning
                 visible: showPercentage  // User-configurable visibility
             }
@@ -649,13 +653,13 @@ PlasmoidItem {
                 PlasmaComponents3.Label { text: formatValue(voltageVolts, "V", 1) }
 
                 // Time remaining or time to full charge
-                PlasmaComponents3.Label { 
+                PlasmaComponents3.Label {
                     text: isCharging ? "⏱️ Full charge:" : "⏰ Time remaining:"
-                    font.bold: true 
+                    font.bold: true
                 }
                 PlasmaComponents3.Label {
                     text: timeRemaining || "Cannot calculate"
-                    color: timeRemaining && timeRemaining.includes("min") ? 
+                    color: timeRemaining && timeRemaining.includes("min") ?
                            Kirigami.Theme.neutralTextColor : Kirigami.Theme.textColor
                 }
 
@@ -669,8 +673,8 @@ PlasmoidItem {
 
                 // Battery model and vendor information
                 PlasmaComponents3.Label { text: "📋 Model:"; font.bold: true }
-                PlasmaComponents3.Label { 
-                    text: (batteryVendor !== "Unknown" ? batteryVendor + " " : "") + 
+                PlasmaComponents3.Label {
+                    text: (batteryVendor !== "Unknown" ? batteryVendor + " " : "") +
                           (batteryModel !== "Unknown" ? batteryModel : "Unknown") +
                           (batteryTechnology !== "Unknown" ? " (" + batteryTechnology + ")" : "")
                 }
@@ -688,3 +692,4 @@ PlasmoidItem {
         }
     }
 }
+

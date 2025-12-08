@@ -2,33 +2,45 @@
 <kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
-      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
-    <kcfgfile name=""/>
+                          https://develop.kde.org/kcfg.xsd">
+
+    <kcfgfile name="plasma_applet_batterywidgetrc"/>
 
     <group name="General">
-        <entry name="showPercentageLeft" type="Bool">
-            <label>Show battery percentage on the left side of icon</label>
-            <default>false</default>
-        </entry>
+        <!-- Affichage du pourcentage -->
         <entry name="showPercentage" type="Bool">
-            <label>Show battery percentage</label>
             <default>true</default>
         </entry>
+
+        <!-- Position du pourcentage à gauche -->
+        <entry name="showPercentageLeft" type="Bool">
+            <default>false</default>
+        </entry>
+
+        <!-- Rotation de l’icône batterie -->
+        <entry name="rotateBatteryIcon" type="Bool">
+            <default>false</default>
+        </entry>
+
+        <!-- Intervalle de mise à jour (s) -->
         <entry name="updateInterval" type="Int">
-            <label>Update interval in seconds</label>
             <default>30</default>
             <min>1</min>
             <max>120</max>
         </entry>
+
+        <!-- Espacement entre icône et texte (%) en pixels -->
         <entry name="batterySpacing" type="Int">
-            <label>Battery spacing in pixels</label>
             <default>5</default>
             <min>0</min>
             <max>20</max>
         </entry>
-        <entry name="rotateBatteryIcon" type="Bool">
-            <label>Rotate battery icon by 180 degrees</label>
-            <default>false</default>
+
+        <!-- Nouvelle entrée : taille de police du pourcentage (en pixels) -->
+        <entry name="percentageFontSize" type="Int">
+            <default>10</default>
+            <min>6</min>
+            <max>32</max>
         </entry>
     </group>
 </kcfg>
